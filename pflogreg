@@ -48,7 +48,7 @@ $|++;  #turn off buffering for STDOUT
 sub handleStream() {
     my $fh = shift;
     my %P;
-    my $retsat = 1;
+    my $retstat = 1;
 
     while (<$fh>) {
         next unless /: ([0-9A-Z]{11})/;
