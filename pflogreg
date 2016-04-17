@@ -48,23 +48,25 @@ $|++;  #turn off buffering for STDOUT
 sub handleStream() {
     my $fh = shift;
     my %P;
-    my $retstat = 1;
+    my $found = 0;
 
     while (<$fh>) {
         next unless /: ([0-9A-Z]{11})/;
         $q = $1;
         $P{$q} .= $_;
         if (/: removed$/) {
-            $retstat = 0;
-            print $P{$q} if $P{$q} =~ $regex;
-            undef( $P{$q} );
+            if ($P{$q} =~ $regex) {
+                print $P{$q};
+                $found++;
+            }
+            undef $P{$q};
         }
     }
-    return $retstat;
+    return $found;
 }
 
 if (@ARGV==0) {
-    $exstat = &handleStream(\*STDIN);
+    $exstat = 0 if &handleStream(\*STDIN);
     exit( $exstat );
 }
 
