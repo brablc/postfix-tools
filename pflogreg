@@ -10,10 +10,14 @@ pflogrep [-i] PATTERN [FILE]....
 =head1 DESCRIPTION
 
 Allows to grep complete activity where PATTERN was found.
+Get nice stats of filtered output using pflogsumm:
+  http://jimsun.linxnet.com/postfix_contrib.html
 
 =head1 AUTHOR
 
 Ondrej Brablc <https://github.com/brablc/>
+
+https://github.com/brablc/postfix-tools
 
 =cut
 
@@ -26,6 +30,11 @@ $me [-i] PATTERN [FILE]....
 
   -i  -- ignore case distinctions when matching
 
+Examples:
+  # Get only communication related to one email
+  pflogrep info\@example.com mail.log | pflogsumm
+  # Get communication for whole domain - print only from and to lines and color email and status
+  pflogrep example.com mail.log | grep -e from= -e to= | grep --color -P \\<.*\\>\\|status
 ";
 
 die $Usage unless &GetOptions( 'i' ) && (@ARGV >= 1 );
