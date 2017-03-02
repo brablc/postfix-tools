@@ -5,7 +5,7 @@ pflogrep -- Postfix log grep complete activity
 
 =head1 SYNOPSIS
 
-pflogrep [-i] PATTERN [FILE]....
+pflogrep [-i] [-s] [-v] PATTERN [FILE]....
 
 =head1 DESCRIPTION
 
@@ -26,19 +26,20 @@ use Getopt::Long;
 ($me = $0) =~ s%.*/%%;
 
 $Usage = "
-$me [-iv] PATTERN [FILE]....
+$me [-i] [-s] [-v] PATTERN [FILE]....
 
   -i  -- ignore case distinctions when matching
+  -s  -- add separator between messages
   -v  -- selected lines are those not matching
 
 Examples:
   # Get only communication related to one email
-  pflogrep info\@example.com mail.log | pflogsumm
+  $me info\@example.com mail.log | pflogsumm
   # Get communication for whole domain - print only from and to lines and color email and status
-  pflogrep example.com mail.log | grep -e from= -e to= | grep --color -P \\<.*\\>\\|status
+  $me example.com mail.log | grep -e from= -e to= | grep --color -P \\<.*\\>\\|status
 ";
 
-die $Usage unless &GetOptions( 'i', 'v' ) && (@ARGV >= 1 );
+die $Usage unless &GetOptions( 'i', 's', 'v' ) && (@ARGV >= 1 );
 
 $ptn = shift;
 $regex = ( $opt_i ) ?  qr/$ptn/io : qr/$ptn/o;
@@ -52,13 +53,14 @@ sub handleStream() {
     my $found = 0;
 
     while (<$fh>) {
-        next unless /: (([0-9A-Z]{11})|NOQUEUE)/;
+        next unless /: (([0-9A-Z]{10})|NOQUEUE)/;
         $q = $1;
         $P{$q} .= $_;
         if (/: (removed$|milter-reject:)/ || $q eq 'NOQUEUE') {
             $matches = $P{$q} =~ $regex;
             if ( ($matches && !$opt_v) || (!$matches && $opt_v)) {
                 print $P{$q};
+                print '-' x 50, "\n" if $opt_s;
                 $found++;
             }
             undef $P{$q};
