@@ -57,7 +57,7 @@ sub checkMatch() {
         print '-' x 50, "\n" if $opt_s;
         $found++;
     }
-    undef $P{$q};
+    delete $P{$q};
 }
 
 sub handleStream() {
